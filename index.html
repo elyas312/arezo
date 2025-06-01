@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <title>بامدیریت آرزو ابراهیمی</title>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      direction: rtl;
+      color: black;
+      padding: 30px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1, h2 {
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    form, .admin-section, .admin-login {
+      background-color: #d4f8d4; /* سبز ملایم */
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      margin: 20px auto;
+      box-sizing: border-box;
+      border: 2px solid #2e8b57; /* کادر سبز */
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #2e8b57;
+      color: black;
+    }
+    button {
+      background-color: #2e8b57;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #246b45;
+    }
+    #priceBox, #imageBox {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #imageBox img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #d4f8d4; /* پس‌زمینه سبز جدول */
+      border: 2px solid #2e8b57;
+    }
+    th, td {
+      border: 1px solid #2e8b57;
+      padding: 10px;
+      background-color: white;
+      text-align: right;
+    }
+    .hidden {
+      display: none;
+    }
+    .logout-btn {
+      background-color: #2e8b57;
+      margin-bottom: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #246b45;
+    }
+  </style>
+</head>
+<body>
+
+<h1>برند آرزو</h1>
+
+<form id="orderForm">
+  <label>اسم مشتری:</label>
+  <input type="text" id="name" required />
+
+  <label>شماره تماس:</label>
+  <input type="tel" id="phone" required />
+
+  <label>آدرس:</label>
+  <input type="text" id="address" required />
+
+  <label>سن:</label>
+  <input type="number" id="age" min="1" max="120" required />
+
+  <label>انتخاب لباس:</label>
+  <select id="dress" required onchange="updatePriceAndImage()">
+    <option value="">انتخاب کنید</option>
+    <option value="لباس قندهاری">لباس قندهاری</option>
+    <option value="لباس هزارگی">لباس هزارگی</option>
+    <option value="لباس بدخشانی">لباس بدخشانی</option>
+    <option value="لباس پشتونی">لباس پشتونی</option>
+  </select>
+
+  <div id="priceBox"></div>
+  <div id="imageBox"></div>
+
+  <button type="submit">ثبت سفارش</button>
+</form>
+
+<div class="admin-login" id="adminLoginSection">
+  <h2>ورود مدیر</h2>
+  <input type="password" id="adminPass" placeholder="رمز عبور را وارد کنید" />
+  <button onclick="checkAdmin()">ورود</button>
+</div>
+
+<div class="admin-section hidden" id="adminSection">
+  <h2>لیست سفارش‌ها</h2>
+  <button class="logout-btn" onclick="logoutAdmin()">خروج</button>
+  <table>
+    <thead>
+      <tr>
+        <th>اسم مشتری</th>
+        <th>شماره تماس</th>
+        <th>آدرس</th>
+        <th>سن</th>
+        <th>لباس انتخابی</th>
+        <th>تاریخ</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+  </table>
+</div>
+
+<script>
+  const dressPrices = {
+    "لباس قندهاری": 2500,
+    "لباس هزارگی": 3000,
+    "لباس بدخشانی": 2800,
+    "لباس پشتونی": 2600,
+  };
+
+  const dressImages = {
+    "لباس قندهاری": "https://i.imgur.com/RccCSNN.jpg",
+    "لباس هزارگی": "https://i.imgur.com/EeOmvNv.jpg",
+    "لباس بدخشانی": "https://i.imgur.com/kzLvcKt.jpg",
+    "لباس پشتونی": "https://i.imgur.com/7Dxz9u3.jpg"
+  };
+
+  function updatePriceAndImage() {
+    const dress = document.getElementById("dress").value;
+    const priceBox = document.getElementById("priceBox");
+    const imageBox = document.getElementById("imageBox");
+
+    if (dressPrices[dress]) {
+      priceBox.innerHTML = `قیمت: ${dressPrices[dress].toLocaleString('fa')} افغانی`;
+      imageBox.innerHTML = `<img src="${dressImages[dress]}" alt="${dress}" />`;
+    } else {
+      priceBox.innerHTML = "";
+      imageBox.innerHTML = "";
+    }
+  }
+
+  const form = document.getElementById("orderForm");
+  const ordersTable = document.getElementById("ordersTable");
+  const adminSection = document.getElementById("adminSection");
+  const adminLoginSection = document.getElementById("adminLoginSection");
+  const ADMIN_PASSWORD = "456789";
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const order = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      age: document.getElementById("age").value,
+      dress: document.getElementById("dress").value,
+      date: new Date().toLocaleDateString('fa-AF')
+    };
+
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    alert("✅ سفارش با موفقیت ثبت شد!");
+    form.reset();
+    document.getElementById("priceBox").innerHTML = "";
+    document.getElementById("imageBox").innerHTML = "";
+  });
+
+  function checkAdmin() {
+    const enteredPass = document.getElementById("adminPass").value.trim();
+    if (enteredPass === ADMIN_PASSWORD) {
+      localStorage.setItem("isAdminLoggedIn", "true");
+      showAdminSection();
+      loadOrders();
+    } else {
+      alert("❌ رمز اشتباه است!");
+    }
+  }
+
+  function showAdminSection() {
+    adminSection.classList.remove("hidden");
+    adminLoginSection.classList.add("hidden");
+  }
+
+  function logoutAdmin() {
+    localStorage.removeItem("isAdminLoggedIn");
+    adminSection.classList.add("hidden");
+    adminLoginSection.classList.remove("hidden");
+  }
+
+  function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    ordersTable.innerHTML = "";
+    orders.forEach(order => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${order.name}</td>
+        <td>${order.phone}</td>
+        <td>${order.address}</td>
+        <td>${order.age}</td>
+        <td>${order.dress}</td>
+        <td>${order.date}</td>
+      `;
+      ordersTable.appendChild(row);
+    });
+  }
+
+  window.onload = function () {
+    if (localStorage.getItem("isAdminLoggedIn") === "true") {
+      showAdminSection();
+      loadOrders();
+    }
+  };
+</script>
+</body>
+</html>
